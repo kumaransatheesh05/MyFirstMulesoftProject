@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="fetch_data_fromDB_by_QueryPharamFlow" doc:id="7dddca20-6dc3-42c4-ae0a-ba44138140cf" >
+		<http:listener doc:name="RecordsFetchByQuery" doc:id="f8c1de88-fd41-44cc-b505-6e1698c882ed" config-ref="HTTP_Listener_config" path="/dfetch"/>
+		<logger level="INFO" doc:name="StartLogger" doc:id="39fb6622-dac8-4f15-8f4d-cd5e19cd8190" message="fetching data from db :#[attributes.queryParams.Emp_id]"/>
+		<db:select doc:name="Select" doc:id="d1887400-a97b-4f24-a01b-a1baebac2b63" config-ref="Database_Config">
+			<db:sql ><![CDATA[select Emp_id,Emp_name,Status from Employement where Emp_id = :Emp_id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"Emp_id": attributes.queryParams.Emp_id
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="3b836b19-a027-4c6f-b56f-b5ba20659729" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	Emp_id: payload[0].Emp_id as String default "",
+	Emp_name: payload[0].Emp_name default "",
+	Status: payload[0].Status default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="EndLogger" doc:id="af7fa49f-6e96-40c0-a2f9-03ac898cb94a" message="Data will be inserted successfully"/>
+	</flow>
+	<flow name="fetch_data_fromDB_by_QueryPharamFlow1" doc:id="d833a317-9530-43ec-8858-1ad8186dc458" >
+		<http:listener doc:name="Employement_insert" doc:id="26629fd2-8e54-43a3-bd9f-9253b71749d6" config-ref="HTTP_Listener_config" path="/empInsert"/>
+		<logger level="INFO" doc:name="StartLogger" doc:id="a070936f-30c3-4c14-ae87-c09ae829a2d5" message="data will be inserted into Db:#[payload]"/>
+		<db:insert doc:name="Insert" doc:id="f46316e4-9396-4921-b681-03c4eb07dfac" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into Employement(Emp_id,Emp_name,Status) values (:Emp_id,:Emp_name,:Status)
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+  "Emp_id":"01",
+  "Emp_name":"DarlingSatheesh",
+  "Status":"A"
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="6c71e913-82fc-40dc-8200-e71d40aad183" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Status code": 200,
+	"message": "data is successfully inserted"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="EndLogger" doc:id="778f2e2f-4879-41a4-8f32-1110cc4c0f6a" message="successfully inserted"/>
+	</flow>
+</mule>

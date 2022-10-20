@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="employee" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="sanple" format="json">
+      <types:shape format="weave" example="examples/emp_id.json"><![CDATA[%dw 2.0
+
+type sanple = {|
+  Emp_id: String, 
+  Emp_name: String, 
+  Status: String
+|} {"example": "{\\\"Emp_id\\\":\\\"01\\\",\\\"Emp_name\\\":\\\"DarlingSatheesh\\\",\\\"Status\\\":\\\"A\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#3b836b19-a027-4c6f-b56f-b5ba20659729">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="sanple"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
